@@ -13,7 +13,7 @@ import java.util.List;
 public interface OrderDao extends BaseMapper<Orders> {
     public int selectAddOrder(Orders order);
     public int selectAddOrderItem(Orderitem orderitem);
-    public long selectOrderByDate(String createDate);
+    public long selectNewOrderId();
     public float selectOrderPrice(@Param("oid") long oid);
     public int selectUpdateOrderPrice(@Param("orderPrice") float orderPrice, @Param("id") long id);
     public List<Orders> selectListOrderByUid(@Param("uid") long uid);

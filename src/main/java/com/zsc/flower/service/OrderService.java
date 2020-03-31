@@ -14,7 +14,7 @@ import java.util.List;
 public interface OrderService {
     public int findAddOrder(Orders order);
     public int findAddOrderItem(Orderitem orderitem);
-    public long findOrderByDate(String createDate);
+    public long findNewOrderId();
     public float findOrderPrice(@Param("oid") long oid);
     public int findUpdateOrderPrice(float orderPrice, long id);
     //==========================

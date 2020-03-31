@@ -37,12 +37,13 @@ public class OrderController {
 
     //这里相当于从购物车里选中商品，然后结算生成订单，然后生成订单项
     @RequestMapping(value = "/addOrder",method = RequestMethod.POST)
-    public ResponseDataPay addOrder(OrderAttach orderAttach){
+    public ResponseDataPay addOrder(HttpServletRequest request,OrderAttach orderAttach){
         //用户可以修改和提交的内容有：地址，收货人名字，收货人电话，买家留言，都是order表的字段
         //新建这个订单
         Orders order=new Orders();
-
-        order.setUid(orderAttach.getUid());
+        String token = request.getHeader("token");
+        long uid = Long.parseLong(tokenService.reUserIdBytoken(token));
+        order.setUid(uid);
         order.setAddress(orderAttach.getAddress());
         order.setReceiver(orderAttach.getReceiver());
         order.setMobile(orderAttach.getMobile());
@@ -56,7 +57,7 @@ public class OrderController {
         int n=orderService.findAddOrder(order);//此处成功插入orders表中
 
 
-        long orderid=orderService.findOrderByDate(date.toLocaleString());
+        long orderid=orderService.findNewOrderId();
 
 //        接下来要做的是插入该订单的订单项
 
@@ -66,10 +67,10 @@ public class OrderController {
         int m=0,a=0;
         int orderPrice=0;
         for(long pid:pidList){//从多选框里把选中的pid遍历出来，然后跟orderitem绑在一起
-            Cart cart=cartService.findCartByUidAndPid(orderAttach.getUid(),pid);
+            Cart cart=cartService.findCartByUidAndPid(uid,pid);
             orderitem.setPid(pid);
             orderitem.setOid(orderid);
-            orderitem.setUid(orderAttach.getUid());
+            orderitem.setUid(uid);
             orderitem.setNumber((long) cart.getCount());
             orderitem.setSimplePrice(cart.getSimplePrice());
             orderitem.setTotalPrice(cart.getTotalPrice());
@@ -85,7 +86,7 @@ public class OrderController {
                 productService.findUpdateSaleCount(pid,oldSaleCount+cart.getCount());
             }
             //删除对应的购物车！！！！！！！！！！！！
-            cartService.findDeleteCartByUidAndPid(orderAttach.getUid(),pid);
+            cartService.findDeleteCartByUidAndPid(uid,pid);
         }
         if(n==1&&m==1){
             orderPrice= (int) orderService.findOrderPrice(orderid);
@@ -95,7 +96,7 @@ public class OrderController {
 //            checkPayStation(String.valueOf(System.currentTimeMillis()));//把订单编号传入这个函数里
 //                return ResponseDataPay.createBySuccess(WebCts.RESP_SUCCESS,String.valueOf(System.currentTimeMillis()),
 //                        String.valueOf(System.currentTimeMillis()), String.valueOf(orderPrice));
-                return ResponseDataPay.createBySuccess(WebCts.RESP_SUCCESS,orderAttach.getUid(),orderid, String.valueOf(order.getOrderCode()),
+                return ResponseDataPay.createBySuccess(WebCts.RESP_SUCCESS,uid,orderid, String.valueOf(order.getOrderCode()),
                         String.valueOf(order.getOrderCode()), String.valueOf(orderPrice));
 
         }
@@ -105,9 +106,11 @@ public class OrderController {
 
     //展示用户的订单列表,所有订单
     @RequestMapping(value = "/listOrderByUid",method = RequestMethod.GET)
-    public ResponseData listOrderByUid(@RequestParam(defaultValue = "1",required = true,value="pn")Integer pn, @RequestParam("uid") long uid){
+    public ResponseData listOrderByUid(@RequestParam(defaultValue = "1",required = true,value="pn")Integer pn,HttpServletRequest request){
         int pageSize=10;
         PageHelper.startPage(pn,pageSize);
+        String token = request.getHeader("token");
+        long uid = Long.parseLong(tokenService.reUserIdBytoken(token));
         PageInfo<Orders> pageInfo= orderService.findListOrderByUid(pn,pageSize,uid);
         ResponseData responseData=ResponseData.createBySuccess();
         responseData.setData(pageInfo);
@@ -126,8 +129,12 @@ public class OrderController {
 
     //用户订单项的显示
     @RequestMapping(value = "/OrderDetail",method = RequestMethod.GET)
-    public ResponseData listOrderAndDetail(@RequestParam("uid")long uid,
-                                           @RequestParam("id")long id){
+    public ResponseData listOrderAndDetail(HttpServletRequest request,
+                                           @RequestParam("orderCode")String orderCode){
+        String token = request.getHeader("token");
+        long uid = Long.parseLong(tokenService.reUserIdBytoken(token));
+        Orders orders = orderService.findOrderByOrderCode(orderCode);
+        long id = orders.getId();
         List<OrderItemDetail> orderItemDetailList=orderService.findOrderItemDetail(uid,id);
         OrderOtherDetail orderOtherDetail=orderService.findOrderOtherDetail(uid,id);
 
@@ -177,12 +184,13 @@ public class OrderController {
 
     //立即购买商品
     @RequestMapping(value = "/buyNow",method = RequestMethod.GET)
-    public ResponseDataPay buyNow(BuyNow buyNow){
+    public ResponseDataPay buyNow(BuyNow buyNow,HttpServletRequest request){
         //用户可以修改和提交的内容有：地址，收货人名字，收货人电话，买家留言，都是order表的字段
         //新建这个订单
         Orders order=new Orders();
-
-        order.setUid(buyNow.getUid());
+        String token = request.getHeader("token");
+        long uid = Long.parseLong(tokenService.reUserIdBytoken(token));
+        order.setUid(uid);
         order.setAddress(buyNow.getAddress());
         order.setReceiver(buyNow.getReceiver());
         order.setMobile(buyNow.getMobile());
@@ -194,7 +202,7 @@ public class OrderController {
         order.setStatus("待付款");
 
         int n=orderService.findAddOrder(order);//此处成功插入orders表中
-        long orderid=orderService.findOrderByDate(date.toLocaleString());
+        long orderid=orderService.findNewOrderId();
 
 //        接下来要做的是插入该订单的订单项
 
@@ -203,7 +211,7 @@ public class OrderController {
         int orderPrice=0;
             orderitem.setPid(buyNow.getPid());
             orderitem.setOid(orderid);
-            orderitem.setUid(buyNow.getUid());
+            orderitem.setUid(uid);
             orderitem.setNumber(buyNow.getNumber());
 
             Product product=productService.findProductById(buyNow.getPid());
@@ -227,7 +235,7 @@ public class OrderController {
             a=orderService.findUpdateOrderPrice(orderPrice,orderid);
         }
         if(a==1){
-            return ResponseDataPay.createBySuccess(WebCts.RESP_SUCCESS,buyNow.getUid(),orderid, String.valueOf(order.getOrderCode()),
+            return ResponseDataPay.createBySuccess(WebCts.RESP_SUCCESS,uid,orderid, String.valueOf(order.getOrderCode()),
                     String.valueOf(order.getOrderCode()), String.valueOf(orderPrice));
         }
         else
@@ -262,9 +270,9 @@ public class OrderController {
 
     @RequestMapping(value = "/alterOrder",method = RequestMethod.POST)
     public ResponseDataPay updateOrder(@RequestParam("receiver")String receiver, @RequestParam("phone")String phone,
-                                       @RequestParam("address")String address, @RequestParam("msg")String msg, @RequestParam("ordercode")long ordercode, HttpServletRequest request)
+                                       @RequestParam("address")String address, @RequestParam("msg")String msg, @RequestParam("ordercode")String ordercode, HttpServletRequest request)
     {
-        Orders order=orderService.findOrderById(ordercode);
+        Orders order=orderService.findOrderByOrderCode(ordercode);
         if(order==null)
         {
             ResponseDataPay responseData=ResponseDataPay.createByError();

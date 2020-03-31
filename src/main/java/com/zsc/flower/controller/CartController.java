@@ -4,6 +4,7 @@ import com.zsc.flower.domain.entity.Cart;
 import com.zsc.flower.domain.entity.Product;
 import com.zsc.flower.domain.vo.ResponseData;
 import com.zsc.flower.service.CartService;
+import com.zsc.flower.service.Impl.TokenService;
 import com.zsc.flower.service.ProductImageService;
 import com.zsc.flower.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 
@@ -24,19 +26,24 @@ public class CartController {
     ProductService productService;
     @Autowired
     ProductImageService productImageService;
+    @Autowired
+    TokenService tokenService;
 
     //用户加入购物车
     @RequestMapping(value = "/addCart",method = RequestMethod.POST)
-    public ResponseData addCart(@RequestParam("uid")long uid,
-                                @RequestParam("pid")long pid,
+    public ResponseData addCart(HttpServletRequest request,@RequestParam("pid")long pid,
                                 @RequestParam("count")int count){
 //      用pid去购物车里头找，看看购物车里有没有这个商品，如果有就在原有的基础上改变数量
+        String token = request.getHeader("token");
+        long uid = Long.parseLong(tokenService.reUserIdBytoken(token));
         int n=0;
         Cart oldCart=cartService.findCartByUidAndPid(uid,pid);
         if(oldCart!=null){
             long oldCount=oldCart.getCount();
             long newCount=oldCount+count;
             oldCart.setCount((int) newCount);
+            Product product=productService.findProductById(pid);
+            oldCart.setTotalPrice(newCount*product.getPromotePrice());
             cartService.findUpdateCart(oldCart);
             n=1;
         }
@@ -61,7 +68,9 @@ public class CartController {
     }
     //展示用户的购物车列表
     @RequestMapping(value = "/listCart",method = RequestMethod.GET)
-    public ResponseData listCart(long uid){
+    public ResponseData listCart(HttpServletRequest request){
+        String token = request.getHeader("token");
+        long uid = Long.parseLong(tokenService.reUserIdBytoken(token));
         List<Cart> cartList=cartService.findListCartByUid(uid);
         ResponseData responseData=ResponseData.createBySuccess();
         responseData.setData(cartList);

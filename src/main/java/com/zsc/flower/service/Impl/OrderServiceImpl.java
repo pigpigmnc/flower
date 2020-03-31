@@ -29,8 +29,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public long findOrderByDate(String createDate) {
-        return orderDao.selectOrderByDate(createDate);
+    public long findNewOrderId() {
+        return orderDao.selectNewOrderId();
     }
 
     @Override

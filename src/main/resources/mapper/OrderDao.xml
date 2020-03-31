@@ -15,8 +15,8 @@
         values (#{pid},#{oid},#{uid},#{number},#{simplePrice},#{totalPrice})
     </insert>
 
-    <select id="selectOrderByDate" parameterType="String" resultType="Long">
-        select id from orders where createDate=#{createDate}
+    <select id="selectNewOrderId" resultType="Long">
+        select id from orders order by createDate desc limit 0,1
     </select>
 
     <select id="selectOrderPrice" parameterType="Long" resultType="Float">
