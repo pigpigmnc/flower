@@ -127,7 +127,16 @@ public class LoginController {
             responseLogin.setMsg("系统出现错误!");
             return responseLogin;//为空就直接拦截 返回给前端msg="fail"}
         }
-
-
     }
+    @RequestMapping(value = "/checkLogin", method = RequestMethod.GET)
+    public ResponseLogin checkLogin(HttpServletRequest request){
+        String token = request.getHeader("token");
+        if(token==null){
+            return ResponseLogin.createByError();
+        }
+        else{
+            return ResponseLogin.createBySuccess();
+        }
+    }
+
 }

@@ -56,7 +56,6 @@ orderitem.pid =  product.id AND
 product.id =  productimage.pid
 GROUP BY
             product.name
-
     </select>
 
     <select id="selectOrderOtherDetail" resultType="com.zsc.flower.domain.entity.OrderOtherDetail">
@@ -111,7 +110,10 @@ GROUP BY
     </delete>
     <!--=============================-->
     <delete id="deletOrderByStatusAndUid" >
-        delete from orders where id=#{id} and uid=#{uid} and status=#{status}
+        delete from orders where id=#{id} and uid=#{uid}
+        <if test="status !=null and status !='' ">
+            and status=#{status}
+        </if>
     </delete>
     <select id="selectOrderById" resultType="com.zsc.flower.domain.entity.Orders">
         select * from orders where id=#{id}
@@ -122,4 +124,25 @@ GROUP BY
         mobile=#{mobile},userMessage=#{userMessage},orderPrice=#{orderPrice}
         where orderCode=#{orderCode}
     </update>
+
+    <select id="findOrderItemDetailById" resultType="com.zsc.flower.domain.entity.OrderItemDetail">
+    SELECT
+orders.orderCode,
+orderitem.number,
+orderitem.simplePrice,
+orderitem.totalPrice,
+product.name,
+productimage.fileurlpath
+FROM
+orders ,
+orderitem ,
+product ,
+productimage
+WHERE
+orders.id =  #{id} AND
+orderitem.oid = #{id} AND
+orderitem.pid =  product.id AND
+product.id =  productimage.pid
+GROUP BY product.name
+    </select>
 </mapper>

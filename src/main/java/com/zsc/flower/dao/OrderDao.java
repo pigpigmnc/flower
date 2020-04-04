@@ -39,4 +39,6 @@ public interface OrderDao extends BaseMapper<Orders> {
     public void deletOrderByStatusAndUid(@Param("id") long id, @Param("uid") long uid, @Param("status") String status);
     public Orders selectOrderById(@Param("id") long id);
     public int selectUpdateOrders(Orders order);
+
+    List<OrderItemDetail> findOrderItemDetailById(long orderId);
 }

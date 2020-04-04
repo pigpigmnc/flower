@@ -12,7 +12,7 @@ public class ResponseData implements Serializable {
     private String msg;    //执行成功或者失败的消息
     private Object data;         //返回给前端的数据
     private String status;
-    private ResponseData(String msg) {
+    public ResponseData(String msg) {
         this.msg = msg;
     }
     //返回成功的消息

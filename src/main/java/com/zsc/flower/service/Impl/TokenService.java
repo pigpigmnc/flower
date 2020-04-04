@@ -58,8 +58,8 @@ public class TokenService {
         String userJson=this.reUserIdBytoken(token);
         if(redisUtil.exists(userJson))
         {
-            String tvalue=this.getRedisValue(userJson);
-            if(token.equals(tvalue))
+            String value=this.getRedisValue(userJson);
+            if(token.equals(value))
                 return true;
             else
                 return false;

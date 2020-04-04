@@ -44,4 +44,6 @@ public interface OrderService {
     public Orders findOrderById(long id);
 
     public int findUpdatas(Orders orders);
+
+    List<OrderItemDetail> findOrderItemDetailById(long orderId);
 }

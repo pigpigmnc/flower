@@ -108,7 +108,7 @@ public class OrderServiceImpl implements OrderService {
 //===============================
     @Override
     public void findDelByIdAndUid(long id, long uid) {
-        orderDao.deletOrderByStatusAndUid(id,uid,"已签收");
+        orderDao.deletOrderByStatusAndUid(id,uid,"");
     }
     @Override
     public Orders findOrderById(long id) {
@@ -117,5 +117,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public int findUpdatas(Orders orders) {
         return orderDao.selectUpdateOrders(orders);
+    }
+
+    @Override
+    public List<OrderItemDetail> findOrderItemDetailById(long orderId) {
+        return orderDao.findOrderItemDetailById(orderId);
     }
 }

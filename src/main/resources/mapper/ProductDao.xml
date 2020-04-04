@@ -83,9 +83,6 @@ group by product.id
         select * from property where cid=#{cid}
     </select>
     <!--=============================================-->
-    <select id="selectPidByDate" resultType="Long">
-        select id from product where createDate=#{createDate}
-    </select>
     <!--====================================================================7.12-->
     <!--<select id="selectListProductWithSale" resultType="cn.zsc.mall.entity.ListProduct">-->
         <!--select p.id,p.name,p.subTitle,p.originalPrice,p.promotePrice,p.stock,p.createDate,pimage.fileurlpath,c.name as cname,p.saleCoun-->
@@ -106,7 +103,7 @@ group by product.id
 
     <select id="selectProductByCId" parameterType="Long" resultType="com.zsc.flower.domain.entity.ListProduct"><!--yi-->
         select p.id,p.name,p.subTitle,p.originalPrice,p.promotePrice,p.stock,p.createDate,pimage.fileurlpath,c.name as cname,p.saleCount
-        from product as p,category as c,productimage as pimage where p.cid=c.id and p.id=pimage.pid and p.cid=#{cid}
+        from product as p,category as c,productimage as pimage where p.cid=c.id and p.id=pimage.pid and p.cid=#{cid} group by p.id
     </select>
 
     <select id="selectSimpleDetail" resultType="com.zsc.flower.domain.entity.SimpleDetail">
